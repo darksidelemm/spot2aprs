@@ -8,7 +8,7 @@
 #	TODO:
 #	[ ] Nicer error checking (instead of just bombing out)
 
-import aprs, requests, json, sys, argparse, datetime
+import aprs, requests, json, sys, argparse, datetime, dateutil.parser, dateutil.tz
 
 spot_api_url = "https://api.findmespot.com/spot-main-web/consumer/rest-api/2.0/public/feed/%s/message.json"
 
@@ -56,8 +56,13 @@ if args.verbose:
 last_message = spot_data.get('messages', {}).get('message', {})[0]
 
 # Extract data from message.
-message_time = datetime.datetime.fromtimestamp(int(last_message['unixTime']))
-message_age = message_time - datetime.datetime.utcnow()
+
+# Parse ISO 8601 time string.
+message_time = dateutil.parser.parse(last_message['dateTime'])
+# Time-zone aware age calculation
+current_time = datetime.datetime.utcnow()
+current_time = current_time.replace(tzinfo=dateutil.tz.tzutc())
+message_age = current_time - message_time
 message_age_minutes = int(message_age.seconds/60.0)
 
 latitude = last_message['latitude']
@@ -66,6 +71,7 @@ comment = "%s %s %s Batt: %s" % (last_message['messengerName'],last_message['mod
 
 if args.verbose:
 	print("\n\nGot Spot: %.5f, %.5f  %s" % (latitude, longitude, comment))
+	print("Message Time: %s" % str(last_message['dateTime']))
 	print("Message Age: %d minutes." % (message_age_minutes))
 
 # Don't proceed to the APRS upload section if the message is too old.
