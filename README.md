@@ -27,11 +27,20 @@ optional arguments:
 
 
 ## Dependencies
-* Python 2.7 (Python 3 will probably work too)
-* Python Requests
- * Install with: `pip install requests`
-* Python-APRS
- * pip version has bugs (for now), so install using:
-   * `git clone https://github.com/darksidelemm/aprs.git`
-   * `cd aprs`
-   * `sudo python setup.py install`
+* Python 3
+* Python libraries: python-dateutil, requests, aprs
+
+On most debian-based systems, you should be able to get the dependencies by running:
+
+```
+$ sudo apt-get install python3-pip python3-dateutil python3-requests
+$ pip3 install aprs
+```
+
+# Running:
+
+```
+$ python spot2aprs.py --verbose --maxage 120 MYCALL-10 12345 yourapikeyhere
+```
+
+You will probably want to run this in a cron job at maybe 10 minute intervals.
